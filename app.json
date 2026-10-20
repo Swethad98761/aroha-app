@@ -1,0 +1,62 @@
+{
+  "expo": {
+    "name": "Aroha",
+    "slug": "aroha",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.aroha.app",
+      "infoPlist": {
+        "NSMotionUsageDescription": "Aroha uses your step and motion data to automatically track your daily steps, distance, and calories burned.",
+        "NSLocationWhenInUseUsageDescription": "Aroha uses your location to power the live compass on your Daily Steps card."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.aroha.app",
+      "permissions": [
+        "ACTIVITY_RECOGNITION",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "headers": {
+            "Cross-Origin-Embedder-Policy": "credentialless",
+            "Cross-Origin-Opener-Policy": "same-origin"
+          }
+        }
+      ],
+      [
+        "expo-sqlite",
+        {
+          "enableFTS": true
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "aroha"
+  }
+}
