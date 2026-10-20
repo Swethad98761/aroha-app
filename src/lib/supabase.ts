@@ -2,13 +2,20 @@
 import { createClient } from '@supabase/supabase-js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import NodeWebSocket from 'ws';
 
 // Replace these with your Supabase project URL and anon key
 // Get them free at https://supabase.com → New Project → Settings → API
 const SUPABASE_URL = 'https://jxglitqiqwmzygrcmros.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_FiFAJy7SjtQ19yLNq9lJkg_lVWsuAST';
 
+// Metro's web renderer may execute this module in Node 20, which has no native
+// WebSocket. Keep using the platform WebSocket in browsers and React Native.
+const realtimeTransport =
+  typeof globalThis.WebSocket === 'undefined' ? NodeWebSocket : globalThis.WebSocket;
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  realtime: { transport: realtimeTransport },
   auth: {
     ...(Platform.OS === 'web' ? {} : { storage: AsyncStorage }),
     autoRefreshToken: true,
