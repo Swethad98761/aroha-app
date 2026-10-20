@@ -35,12 +35,12 @@ export function ManualWorkoutModal({ visible, onClose }: Props) {
     setPendingSets(pendingSets.filter((_, i) => i !== idx));
   }
 
-  function save() {
+  async function save() {
     const sessionName = name.trim() || `Workout on ${new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-    const session = startWorkoutSession(sessionName);
+    const session = await startWorkoutSession(sessionName);
     // Add all sets
     for (const ps of pendingSets) {
-      addWorkoutSet({
+      await addWorkoutSet({
         exerciseId: ps.exercise.id,
         sessionId: session.id,
         weight: ps.weight,
@@ -51,7 +51,7 @@ export function ManualWorkoutModal({ visible, onClose }: Props) {
         overriddenNotes: null,
       });
     }
-    saveWorkoutSession({ id: session.id, isCompleted: true, duration: parseFloat(duration) * 60 || 0, name: sessionName });
+    await saveWorkoutSession({ id: session.id, isCompleted: true, duration: parseFloat(duration) * 60 || 0, name: sessionName });
     setPendingSets([]); setName(''); setDuration('45'); onClose();
   }
 

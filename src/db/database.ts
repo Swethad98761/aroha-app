@@ -539,22 +539,28 @@ function mapExercise(r: any): Exercise {
   };
 }
 
-export function getWorkoutSessions(): WorkoutSession[] {
+/** Read workout sessions through SQLite's async bridge (required for web). */
+export async function getWorkoutSessionsAsync(): Promise<WorkoutSession[]> {
   const db = getDb();
-  const rows = db.getAllSync<any>('SELECT * FROM workout_sessions ORDER BY date DESC');
-  return rows.map((r) => {
-    const sets = db.getAllSync<any>(
+  const rows = await db.getAllAsync<any>('SELECT * FROM workout_sessions ORDER BY date DESC');
+  const sessions: WorkoutSession[] = [];
+
+  for (const r of rows) {
+    const rowsForSession = await db.getAllAsync<any>(
       'SELECT ws.*, e.id as eid, e.name as ename, e.category, e.is_cardio, e.is_timed, e.video_url, e.custom_notes FROM workout_sets ws LEFT JOIN exercises e ON e.id = ws.exercise_id WHERE ws.session_id=? ORDER BY ws.timestamp',
       [r.id]
-    ).map((s) => ({
+    );
+    const sets = rowsForSession.map((s) => ({
       id: s.id, exerciseId: s.exercise_id, sessionId: s.session_id,
       weight: s.weight, reps: s.reps, timestamp: s.timestamp,
       isCompleted: s.is_completed === 1, duration: s.duration, distance: s.distance,
       overriddenNotes: s.overridden_notes,
       exercise: s.eid ? { id: s.eid, name: s.ename, category: s.category, isCardio: s.is_cardio === 1, videoUrl: s.video_url ?? '', customNotes: s.custom_notes ?? '' } : undefined,
     } as WorkoutSet));
-    return { id: r.id, date: r.date, name: r.name, isCompleted: r.is_completed === 1, duration: r.duration, sets };
-  });
+    sessions.push({ id: r.id, date: r.date, name: r.name, isCompleted: r.is_completed === 1, duration: r.duration, sets });
+  }
+
+  return sessions;
 }
 
 export function insertWorkoutSession(name: string): WorkoutSession {

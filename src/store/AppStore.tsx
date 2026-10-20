@@ -26,7 +26,7 @@ import {
   setRoutineExercises as dbSetRoutineExercises,
   setRoutineExercisesWithTargets as dbSetRoutineExercisesWithTargets,
   updateRoutineExerciseTarget as dbUpdateRoutineExerciseTarget,
-  getWorkoutSessions,
+  getWorkoutSessionsAsync,
   insertWorkoutSession as dbInsertSession,
   updateWorkoutSession as dbUpdateSession,
   deleteWorkoutSession as dbDeleteSession,
@@ -76,7 +76,7 @@ interface AppState {
   meditationSessions: MeditationSession[];
 
   // Actions
-  refreshAll: () => void;
+  refreshAll: () => Promise<void>;
   updateGoals: (g: Partial<UserGoals>) => void;
   addWeightEntry: (v: number) => void;
   removeWeightEntry: (id: string) => void;
@@ -88,12 +88,12 @@ interface AppState {
   removeRoutine: (id: string) => void;
   saveRoutineExercises: (routineId: string, exIds: string[]) => void;
   saveRoutineWithTargets: (routineId: string, items: { exerciseId: string; sets: number; reps: number; weight: number }[]) => void;
-  startWorkoutSession: (name: string, routine?: WorkoutRoutine, startExercise?: Exercise) => WorkoutSession;
-  saveWorkoutSession: (s: Partial<WorkoutSession> & { id: string }) => void;
-  removeWorkoutSession: (id: string) => void;
-  addWorkoutSet: (set: Omit<WorkoutSet, 'id' | 'timestamp'>) => WorkoutSet;
-  saveWorkoutSet: (set: Partial<WorkoutSet> & { id: string }) => void;
-  removeWorkoutSet: (id: string) => void;
+  startWorkoutSession: (name: string, routine?: WorkoutRoutine, startExercise?: Exercise) => Promise<WorkoutSession>;
+  saveWorkoutSession: (s: Partial<WorkoutSession> & { id: string }) => Promise<void>;
+  removeWorkoutSession: (id: string) => Promise<void>;
+  addWorkoutSet: (set: Omit<WorkoutSet, 'id' | 'timestamp'>) => Promise<WorkoutSet>;
+  saveWorkoutSet: (set: Partial<WorkoutSet> & { id: string }) => Promise<void>;
+  removeWorkoutSet: (id: string) => Promise<void>;
   addAsana: (name: string, cats: string[]) => Asana;
   saveAsana: (a: Asana) => void;
   removeAsana: (id: string) => void;
@@ -124,12 +124,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [yogaSessions, setYogaSessions] = useState<YogaSession[]>([]);
   const [meditationSessions, setMeditationSessions] = useState<MeditationSession[]>([]);
 
-  const refreshAll = useCallback(() => {
+  const refreshAll = useCallback(async () => {
     setGoals(getUserGoals());
     setWeightEntries(getWeightEntries());
     setExercises(getExercises());
     setRoutines(getRoutines());
-    setWorkoutSessions(getWorkoutSessions());
+    setWorkoutSessions(await getWorkoutSessionsAsync());
     setAsanas(getAsanas());
     setYogaFlows(getYogaFlows());
     setYogaSessions(getYogaSessions());
@@ -200,7 +200,7 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     saveRoutineExercises: (rid, exIds) => { dbSetRoutineExercises(rid, exIds); setRoutines(getRoutines()); },
     saveRoutineWithTargets: (rid, items) => { dbSetRoutineExercisesWithTargets(rid, items); setRoutines(getRoutines()); },
 
-    startWorkoutSession: (name, routine, startExercise) => {
+    startWorkoutSession: async (name, routine, startExercise) => {
       const session = dbInsertSession(name);
       if (startExercise) {
         // Quick Start with a chosen exercise — seed one set of it
@@ -238,15 +238,16 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
           dbInsertSet({ exerciseId: ex.id, sessionId: session.id, weight: ex.isCardio ? 0 : 45, reps: ex.isCardio ? 0 : 10, isCompleted: false, duration: ex.isCardio ? 600 : null, distance: ex.isCardio ? 1 : null, overriddenNotes: null });
         }
       }
-      setWorkoutSessions(getWorkoutSessions());
-      return getWorkoutSessions().find((s) => s.id === session.id)!;
+      const sessions = await getWorkoutSessionsAsync();
+      setWorkoutSessions(sessions);
+      return sessions.find((s) => s.id === session.id)!;
     },
-    saveWorkoutSession: (s) => { dbUpdateSession(s); setWorkoutSessions(getWorkoutSessions()); },
-    removeWorkoutSession: (id) => { dbDeleteSession(id); setWorkoutSessions(getWorkoutSessions()); },
+    saveWorkoutSession: async (s) => { dbUpdateSession(s); setWorkoutSessions(await getWorkoutSessionsAsync()); },
+    removeWorkoutSession: async (id) => { dbDeleteSession(id); setWorkoutSessions(await getWorkoutSessionsAsync()); },
 
-    addWorkoutSet: (set) => { const s = dbInsertSet(set); setWorkoutSessions(getWorkoutSessions()); return s; },
-    saveWorkoutSet: (set) => { dbUpdateSet(set); setWorkoutSessions(getWorkoutSessions()); },
-    removeWorkoutSet: (id) => { dbDeleteSet(id); setWorkoutSessions(getWorkoutSessions()); },
+    addWorkoutSet: async (set) => { const s = dbInsertSet(set); setWorkoutSessions(await getWorkoutSessionsAsync()); return s; },
+    saveWorkoutSet: async (set) => { dbUpdateSet(set); setWorkoutSessions(await getWorkoutSessionsAsync()); },
+    removeWorkoutSet: async (id) => { dbDeleteSet(id); setWorkoutSessions(await getWorkoutSessionsAsync()); },
 
     addAsana: (name, cats) => { const a = dbInsertAsana(name, cats); setAsanas(getAsanas()); return a; },
     saveAsana: (a) => { dbUpdateAsana(a); setAsanas(getAsanas()); },

@@ -33,11 +33,11 @@ export default function WorkoutsScreen() {
   const workoutDates = workoutSessions.map((s) => s.date);
   const todaySeconds = useMemo(() => workoutSessions.filter((s) => isTodayDate(s.date)).reduce((sum, s) => sum + s.duration, 0), [workoutSessions]);
 
-  function handleStartNew(name?: string, routine?: WorkoutRoutine, startExercise?: Exercise) {
+  async function handleStartNew(name?: string, routine?: WorkoutRoutine, startExercise?: Exercise) {
     // Don't start if there's already an active session
     if (activeSession) { setShowRoutineMenu(false); return; }
     const sessionName = name ?? (routine ? routine.name : `Workout – ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`);
-    startWorkoutSession(sessionName, routine, startExercise);
+    await startWorkoutSession(sessionName, routine, startExercise);
     setShowRoutineMenu(false);
   }
 
