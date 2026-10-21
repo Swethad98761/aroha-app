@@ -4,9 +4,9 @@ Aroha is a meditation and wellness app for building a mindful daily routine. It 
 
 ## App demo
 
-[![Watch the Aroha app demo](docs/aroha-demo-poster.jpg)](docs/aroha-demo.mp4)
+![Animated preview of Aroha workouts, yoga, and meditation](docs/aroha-demo-preview.gif)
 
-Click the preview to watch a 2-minute walkthrough of workouts, yoga, and meditation. The H.264 MP4 is trimmed and optimized for web playback (about 8 MB).
+[Download the full 2-minute walkthrough (MP4)](docs/aroha-demo.mp4) for the complete demo.
 
 ## Requirements
 
