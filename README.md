@@ -2,6 +2,12 @@
 
 Aroha is a meditation and wellness app for building a mindful daily routine. It includes guided meditation, yoga practices, focus tools, workout tracking, and progress summaries. The app uses SQLite for local app data and Supabase for authentication.
 
+## App demo
+
+[![Watch the Aroha app demo](docs/aroha-demo-poster.jpg)](docs/aroha-demo.mp4)
+
+Click the preview to watch a 2-minute walkthrough of workouts, yoga, and meditation. The H.264 MP4 is trimmed and optimized for web playback (about 8 MB).
+
 ## Requirements
 
 - Node.js 20.19.4 or newer (Node.js 22 LTS is also supported)
